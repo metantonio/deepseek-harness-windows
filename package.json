@@ -177,7 +177,9 @@
     "demo:inspector": "node --import tsx/esm apps/cli/src/bin.ts web --patch ./packages/experimental/inspector/cordis.source.patch.yml",
     "mock:llm": "node --import tsx packages/test-support/llm-mock-server/src/bin.ts",
     "dev:web": "tsx scripts/dev-web.ts --poll",
-    "postinstall": "node scripts/install-lefthook.mjs"
+    "postinstall": "node scripts/install-lefthook.mjs",
+    "dev": "cross-env NODE_OPTIONS=\"--import ./dsh-undici-fix.mjs\" node ./dist/cli.js web",
+    "dsh:fix": "cross-env NODE_OPTIONS=\"--import ./dsh-undici-fix.mjs\" pnpm dsh web"
   },
   "devDependencies": {
     "@deepseek-ai/dsh-agent": "workspace:^",
@@ -195,6 +197,7 @@
     "@vitest/coverage-v8": "^4.1.8",
     "@yao-pkg/pkg": "6.21.0",
     "@yarnpkg/cli-dist": "4.17.1",
+    "cross-env": "^10.1.0",
     "eslint-plugin-sonarjs": "^4.1.0",
     "execa": "^10.0.0",
     "fast-check": "^4.8.0",

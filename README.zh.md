@@ -44,6 +44,69 @@ pnpm dsh web
 
 `pnpm run build` 会准备仓库产物。`pnpm dsh web` 会直接使用这些已构建产物，不会重新构建。
 
+### 本地 AI 模型与无限超时等待（Fork 特性）
+
+在此 Fork 中，启用了本地 AI 模型（如 `llama-cpp`）的无限等待响应支持，以防止在生成速度（token/秒）较慢时发生超时中断。
+
+使用步骤如下：
+
+1. **配置 [dsh-undici-fix.mjs](dsh-undici-fix.mjs) 中的 Undici 路径**：在 `dsh-undici-fix.mjs` 中，根据当前设备确认或添加 `undici/index.js` 的绝对路径（例如 `C:/Users/<用户>/.dsh/profiles/node_modules/undici/index.js`）。
+2. **在 `settings.yml` 中配置超时时间**：在用户配置文件（Windows 下为 `C:\Users\<用户>\.dsh\settings.yml`，Linux/macOS 下为 `~/.dsh/settings.yml`）中，为本地 Provider 设置 `timeoutMs: 2147483647` 与 `streamIdleTimeoutMs: 2147483647`，并在 `shell` 中配置 `timeoutMs: 2147483647`。示例如下：
+
+```yaml
+ui-onboarding:
+  welcomeNoticeVersion: 2026-08-13.1
+llm-pi-ai:
+  providers:
+    {
+      llama-cpp:
+        {
+          displayName: llama-cpp,
+          apiKeyEnv: LLAMA_CPP_API_KEY,
+          api: openai-completions,
+          baseURL: http://localhost:8080/v1,
+          timeoutMs: 2147483647,
+          streamIdleTimeoutMs: 2147483647,
+          models:
+            [
+              { id: C:\LLM\Qwen3.8-27B-ASCII-Condensed-UD-IQ4_XS.gguf, contextWindow: 77824 },
+              {
+                  id: C:\LLM\Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp.gguf,
+                  name: C:\LLM\Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp.gguf,
+                  contextWindow: 77824
+                },
+              {
+                  id: C:\LLM\QWEN3.8-flash-next-UD-IQ3_XXS\Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf,
+                  name: C:\LLM\QWEN3.8-flash-next-UD-IQ3_XXS\Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf,
+                  contextWindow: 135536
+                }
+            ]
+        },
+      freetoken:
+        {
+          apiKeyEnv: FREETOKEN_API_KEY,
+          api: openai-completions,
+          baseURL: http://127.0.0.1:1919/v1,
+          models: [ { id: Qwen3.6-35B-A3B-NVFP4, contextWindow: 198000 } ]
+        }
+    }
+agent-default-model:
+  provider: llama-cpp
+  model: C:\LLM\QWEN3.8-flash-next-UD-IQ3_XXS\Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf
+agent-presets:
+  default: standard
+permission:
+  defaultPreset: workspace-write
+shell:
+  timeoutMs: 2147483647
+```
+
+3. **在 Build 后运行**：使用 `pnpm run build`（或 `npm run build`）构建后，通过 `npm run dsh:fix`（或 `pnpm dsh:fix`，或在 Windows 下双击 `start.bat`）启动服务：
+
+```sh
+npm run dsh:fix
+```
+
 ## 社区与支持
 
 - 通过 [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions) 提交反馈或 bug 报告。

@@ -3,8 +3,11 @@ const MAX_MS = 2_147_483_647 // 2**31-1 ms ≈ 24.85 days = Node's safe max for 
 
 async function loadUndici() {
   try { const m = await import('undici'); if (m.Agent) return m } catch { }
+  const home = (process.env.USERPROFILE || process.env.HOME || '').replace(/\\/g, '/')
   const cands = [
-    'C:/Users/anton/.dsh/profiles/node_modules/undici/index.js'
+    // Configure aquí la ruta absoluta a undici/index.js según su dispositivo:
+    'C:/Users/anton/.dsh/profiles/node_modules/undici/index.js',
+    ...(home ? [`${home}/.dsh/profiles/node_modules/undici/index.js`] : []),
   ]
   for (const p of cands) {
     try { const m = await import(new URL(`file://${p}`).href); if (m.Agent) return m } catch { }

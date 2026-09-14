@@ -40,6 +40,69 @@ pnpm dsh web
 
 `pnpm run build` prepares the repository artifacts. `pnpm dsh web` uses those built artifacts without rebuilding.
 
+### Local AI models and indefinite response timeout (Fork)
+
+En este fork se habilita la espera indefinida de respuestas en modelos de AI locales (por ejemplo, con proveedores como `llama-cpp`), lo cual evita errores de timeout si la velocidad de generación (tokens/segundo) es lenta.
+
+Para utilizar esta funcionalidad:
+
+1. **Ruta de Undici en [dsh-undici-fix.mjs](dsh-undici-fix.mjs)**: en `dsh-undici-fix.mjs`, agregue o verifique la ruta absoluta a `undici/index.js` según corresponda en cada dispositivo (por ejemplo, `C:/Users/<usuario>/.dsh/profiles/node_modules/undici/index.js`).
+2. **Timeouts en `settings.yml`**: en el archivo de configuración del usuario (`C:\Users\<usuario>\.dsh\settings.yml` en Windows o `~/.dsh/settings.yml` en Linux/macOS), configure `timeoutMs: 2147483647` y `streamIdleTimeoutMs: 2147483647` en el proveedor local, así como `timeoutMs: 2147483647` en la sección `shell`. Ejemplo de `settings.yml`:
+
+```yaml
+ui-onboarding:
+  welcomeNoticeVersion: 2026-08-13.1
+llm-pi-ai:
+  providers:
+    {
+      llama-cpp:
+        {
+          displayName: llama-cpp,
+          apiKeyEnv: LLAMA_CPP_API_KEY,
+          api: openai-completions,
+          baseURL: http://localhost:8080/v1,
+          timeoutMs: 2147483647,
+          streamIdleTimeoutMs: 2147483647,
+          models:
+            [
+              { id: C:\LLM\Qwen3.8-27B-ASCII-Condensed-UD-IQ4_XS.gguf, contextWindow: 77824 },
+              {
+                  id: C:\LLM\Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp.gguf,
+                  name: C:\LLM\Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp.gguf,
+                  contextWindow: 77824
+                },
+              {
+                  id: C:\LLM\QWEN3.8-flash-next-UD-IQ3_XXS\Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf,
+                  name: C:\LLM\QWEN3.8-flash-next-UD-IQ3_XXS\Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf,
+                  contextWindow: 135536
+                }
+            ]
+        },
+      freetoken:
+        {
+          apiKeyEnv: FREETOKEN_API_KEY,
+          api: openai-completions,
+          baseURL: http://127.0.0.1:1919/v1,
+          models: [ { id: Qwen3.6-35B-A3B-NVFP4, contextWindow: 198000 } ]
+        }
+    }
+agent-default-model:
+  provider: llama-cpp
+  model: C:\LLM\QWEN3.8-flash-next-UD-IQ3_XXS\Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf
+agent-presets:
+  default: standard
+permission:
+  defaultPreset: workspace-write
+shell:
+  timeoutMs: 2147483647
+```
+
+3. **Ejecutar después de `build`**: tras compilar con `npm run build` (o `pnpm run build`), inicie la aplicación ejecutando `npm run dsh:fix` (o `pnpm dsh:fix`, o ejecutando `start.bat` en Windows):
+
+```sh
+npm run dsh:fix
+```
+
 ## Community and support
 
 - Submit feedback or bug reports through [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions).

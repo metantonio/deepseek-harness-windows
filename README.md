@@ -42,12 +42,12 @@ pnpm dsh web
 
 ### Local AI models and indefinite response timeout (Fork)
 
-En este fork se habilita la espera indefinida de respuestas en modelos de AI locales (por ejemplo, con proveedores como `llama-cpp`), lo cual evita errores de timeout si la velocidad de generación (tokens/segundo) es lenta.
+This fork enables indefinite response timeouts for local AI models (e.g., with providers like `llama-cpp`), preventing request timeouts when token generation speed (tokens/second) is slow.
 
-Para utilizar esta funcionalidad:
+To use this feature:
 
-1. **Ruta de Undici en [dsh-undici-fix.mjs](dsh-undici-fix.mjs)**: en `dsh-undici-fix.mjs`, agregue o verifique la ruta absoluta a `undici/index.js` según corresponda en cada dispositivo (por ejemplo, `C:/Users/<usuario>/.dsh/profiles/node_modules/undici/index.js`).
-2. **Timeouts en `settings.yml`**: en el archivo de configuración del usuario (`C:\Users\<usuario>\.dsh\settings.yml` en Windows o `~/.dsh/settings.yml` en Linux/macOS), configure `timeoutMs: 2147483647` y `streamIdleTimeoutMs: 2147483647` en el proveedor local, así como `timeoutMs: 2147483647` en la sección `shell`. Ejemplo de `settings.yml`:
+1. **Undici path in [dsh-undici-fix.mjs](dsh-undici-fix.mjs)**: In `dsh-undici-fix.mjs`, verify or add the absolute path to `undici/index.js` as appropriate for your device (for example, `C:/Users/<username>/.dsh/profiles/node_modules/undici/index.js`).
+2. **Timeouts in `settings.yml`**: In your user configuration file (`C:\Users\<username>\.dsh\settings.yml` on Windows or `~/.dsh/settings.yml` on Linux/macOS), configure `timeoutMs: 2147483647` and `streamIdleTimeoutMs: 2147483647` for your local provider, as well as `timeoutMs: 2147483647` under the `shell` section. Example `settings.yml`:
 
 ```yaml
 ui-onboarding:
@@ -97,7 +97,7 @@ shell:
   timeoutMs: 2147483647
 ```
 
-3. **Ejecutar después de `build`**: tras compilar con `npm run build` (o `pnpm run build`), inicie la aplicación ejecutando `npm run dsh:fix` (o `pnpm dsh:fix`, o ejecutando `start.bat` en Windows):
+3. **Run after `build`**: After building the project with `npm run build` (or `pnpm run build`), launch the application by running `npm run dsh:fix` (or `pnpm dsh:fix`, or by executing `start.bat` on Windows):
 
 ```sh
 npm run dsh:fix

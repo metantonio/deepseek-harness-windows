@@ -5,6 +5,7 @@ async function loadUndici() {
   try { const m = await import('undici'); if (m.Agent) return m } catch { }
   const home = (process.env.USERPROFILE || process.env.HOME || '').replace(/\\/g, '/')
   const cands = [
+    new URL('./node_modules/.pnpm/node_modules/undici/index.js', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'),
     // Configure aquí la ruta absoluta a undici/index.js según su dispositivo:
     'C:/Users/anton/.dsh/profiles/node_modules/undici/index.js',
     ...(home ? [`${home}/.dsh/profiles/node_modules/undici/index.js`] : []),

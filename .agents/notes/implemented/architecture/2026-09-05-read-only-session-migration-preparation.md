@@ -65,7 +65,7 @@ Completed results enter the existing bounded `coldLogMemo`. The `StoredLog` disc
 
 `SessionHandle.read()` reports whether its event values are detached or shared-frozen. The JSONL backend deep-freezes each decoded event graph once before memoization and creates the `shared-frozen` result there; later reads and slices preserve that producer-established state even when the slice is empty. `readColdSessionLog()` combines those values with locally owned interrupted-turn closers and passes the `eventState` through `SessionObservationReader`; `Session.fromRestore()` validates and adopts the seed without copying or freezing. Ordinary create and fork seeds keep their defensive snapshot path.
 
-Read-only restoration validates the event and settlement fields required by Session runtime behavior but does not expand every embedded Assistant stream. The publication Worker retains complete stream replay and checks content, usage, and replay-state agreement before a migrated successor is committed. Existing current-v2 files rely on their writer; consumers that expand a compact stream validate its records when they read it.
+Read-only restoration validates the event and settlement fields required by Session runtime behavior but does not expand every embedded Assistant stream. The publication Worker retains complete stream replay and checks content, usage, and replay-state agreement before a migrated successor is committed. Existing current-format files rely on their writer; consumers that expand a compact stream validate its records when they read it.
 
 ### Read handle transition
 
@@ -102,7 +102,7 @@ No external caller can append before the handle exists. `append`, `flush`, and `
 
 ### Follow and Agent promotion
 
-`session.follow` opens history through the read path, restores the Session and projections, emits the opening snapshot, and then starts Agent promotion. Agent resume uses write open, so it waits for publication before the Agent accepts a new turn. History visibility and write readiness are separate timing points without introducing an unpublished append state.
+`session.follow` opens history through the read path, restores the Session and projections, starts Agent promotion from the separately retained Observation when the caller requests activation, and then delivers the opening snapshot. Agent resume uses write open, so it waits for publication before the Agent accepts a new turn. History visibility and write readiness are separate timing points without introducing an unpublished append state.
 
 ## Problem-to-solution mapping
 

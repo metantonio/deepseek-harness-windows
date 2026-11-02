@@ -19,23 +19,37 @@ export interface DockLabels {
   readonly emptyPane: string
   /** The split control, while splitting is allowed. */
   readonly splitPane: string
+  /** ARIA combination from the effective binding, when bound. */
+  readonly splitPaneShortcut?: string | undefined
+  /** Effective split keys shown as separate tooltip keycaps. */
+  readonly splitPaneKeys?: readonly string[] | undefined
   /** The split control, once the pane budget is spent. */
   readonly splitPaneDisabled: string
   /** The split control, while the pane is too narrow for two working halves. */
   readonly splitPaneNarrow: string
   /** Destroy a tab: the chip's close control and the menu's close item. */
   readonly closeTab: string
+  /** Effective close combination, when bound. */
+  readonly closeTabShortcut?: string | undefined
+  /** Effective close keys shown as separate tooltip keycaps. */
+  readonly closeTabKeys?: readonly string[] | undefined
   /** The strip's add control, which seats the embedder's seeded tab. */
   readonly addTab: string
   /** Send a floating panel back into the docked tree. */
   readonly dockFloat: string
   /** Close a floating panel. */
   readonly closeFloat: string
+  /** The drop hint's caption for each body zone a dragged tab can land on. */
+  readonly dropZone: Readonly<Record<DockZone, string>>
 }
 
 /**
  * Renders one tab's body. The embedder dispatches on `tab.kind`, which is the
- * only place that string carries meaning.
+ * only place that string carries meaning. As `renderTab`, the kit calls it
+ * again only when the renderer or the tab record is a new object and reuses the
+ * previous body across its own re-renders, such as a gesture's frames: the body
+ * must follow from `tab` and the values the renderer captures, and any other
+ * input reaches it through a new renderer or the body's own hooks and context.
  */
 export type TabRenderer = (tab: TabRecord) => ReactNode
 
@@ -45,10 +59,12 @@ export type TabRenderer = (tab: TabRecord) => ReactNode
  *
  * The kit's own item is the close gesture; anything that means something about
  * the tab's content comes from here. An item that acts MUST call `dismiss`,
- * because the menu closes on its own items only.
+ * because the menu closes on its own items only. Every rendered item MUST
+ * carry `role="menuitem"`: the kit probes for that role to dismiss a menu
+ * that would paint empty, so items without it count as an empty menu.
  * @param tab - the tab whose menu is open.
  * @param dismiss - close the menu without acting.
- * @returns the extra items, or nothing.
+ * @returns extra actions with ARIA menuitem, menuitemcheckbox, or menuitemradio roles, or nothing.
  */
 export type TabMenuExtras = (tab: TabRecord, dismiss: () => void) => ReactNode
 

@@ -2,9 +2,9 @@
  * Prop shares the kit's own components pass among themselves. These are internal
  * to the package — the outward contracts are in `adapter.ts`.
  */
-import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react'
+import type { PointerEvent as ReactPointerEvent, ReactNode, HTMLAttributes } from 'react'
 import type { DockLabels, TabMenuExtras, TabRenderer } from '../contract/adapter.ts'
-import type { PaneId, SplitId, TabId } from '../contract/types.ts'
+import type { PaneId, SplitId, TabId, TabRecord } from '../contract/types.ts'
 import type { DropTarget } from '../engine/geometry.ts'
 
 /** Why a pane's split control is disabled: the pane budget, or too little width for two halves. */
@@ -23,10 +23,12 @@ export interface PaneCallbacks {
   readonly onDividerPressed: (splitId: SplitId, index: number, event: ReactPointerEvent<HTMLElement>) => void
   /** Why a pane cannot split right now, or `undefined` while it can. */
   readonly splitBlock: (paneId: PaneId) => SplitBlock | undefined
-  /** Hide budget-blocked split controls without hiding width-blocked controls. */
-  readonly hideSplitAtCapacity?: boolean
+  /** Hide blocked split controls instead of rendering them disabled. */
+  readonly hideSplitWhenBlocked?: boolean
   /** Whether a pane's strip draws the add control. */
   readonly canAddTab: (paneId: PaneId) => boolean
+  /** Whether a tab may close via its close control, menu item, or middle click. */
+  readonly canCloseTab: (tabId: TabId) => boolean
   /** Live drop preview, or `undefined` while nothing is being dragged. */
   readonly dropTarget: DropTarget | undefined
   /** Show both horizontal landing regions while a body split is being targeted. */
@@ -37,7 +39,11 @@ export interface PaneCallbacks {
   readonly renderTab: TabRenderer
   /** A chip's or panel header's title content; absent means the record's `title` text. */
   readonly renderTabTitle: TabRenderer | undefined
-  /** Embedder items appended to a tab's context menu; absent means the kit's item only. */
+  /** Whether the embedder popup is preparing or visible; suppresses tab tooltips. */
+  readonly tabMenuOpen?: boolean | undefined
+  /** Override the kit popup; the embedder owns rendering and dismissal. */
+  readonly getTabTriggerProps?: ((tab: TabRecord, paneId: PaneId, handlers?: Pick<HTMLAttributes<HTMLElement>, 'onContextMenu' | 'onKeyDown' | 'tabIndex'>) => Pick<HTMLAttributes<HTMLElement>, 'onContextMenu' | 'onKeyDown' | 'tabIndex'>) | undefined
+  /** Extra rows for the kit popup; ignored when getTabTriggerProps is supplied. */
   readonly renderTabMenuItems: TabMenuExtras | undefined
   /** The pane whose strip hosts the embedder's surface-wide controls. */
   readonly chromePaneId: PaneId

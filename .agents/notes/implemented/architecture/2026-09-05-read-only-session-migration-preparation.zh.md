@@ -65,7 +65,7 @@ interface MigrationPreparation {
 
 `SessionHandle.read()` 会报告 event value 是 detached 还是 shared-frozen。JSONL backend 在 memo 化前只对每个已解码 event graph 深度冻结一次，并在该处构造 `shared-frozen` 结果；后续读取和 slice 即使为空也会保留生产者建立的状态。`readColdSessionLog()` 将这些 event 与本地独占的 interrupted-turn closer 组合，并通过 `SessionObservationReader` 继续传递 `eventState`；`Session.fromRestore()` 只校验和接管 seed，不再复制或冻结。普通 create 与 fork seed 继续使用 defensive snapshot 路径。
 
-Read-only restoration 会校验 Session runtime 直接依赖的 event 与 settlement 字段，但不会展开每一段嵌入式 Assistant stream。Publication Worker 继续执行完整 stream replay，并在提交 migrated successor 前校验 content、usage 与 replay state 一致性。已有 current-v2 文件信任其 writer；需要展开 compact stream 的 consumer 会在读取时校验 record。
+Read-only restoration 会校验 Session runtime 直接依赖的 event 与 settlement 字段，但不会展开每一段嵌入式 Assistant stream。Publication Worker 继续执行完整 stream replay，并在提交 migrated successor 前校验 content、usage 与 replay state 一致性。已有当前格式文件信任其 writer；需要展开 compact stream 的 consumer 会在读取时校验 record。
 
 ### Read handle 切换
 
@@ -102,7 +102,7 @@ Handle 返回前，外部 caller 无法 append。因此 `append`、`flush` 与 `
 
 ### Follow 与 Agent promotion
 
-`session.follow` 通过 read path 打开历史、恢复 Session 与 projections、发出 opening snapshot，然后启动 Agent promotion。Agent resume 使用 write open，因此会在 Agent 接收新一轮对话前等待 publication。历史可见与写入就绪成为两个明确时间点，同时不引入 unpublished append state。
+`session.follow` 通过 read path 打开历史、恢复 Session 与 projections，在调用方请求激活时先用单独 retain 的 Observation 启动 Agent promotion，再交付 opening snapshot。Agent resume 使用 write open，因此会在 Agent 接收新一轮对话前等待 publication。历史可见与写入就绪成为两个明确时间点，同时不引入 unpublished append state。
 
 ## 问题与方案对照
 
